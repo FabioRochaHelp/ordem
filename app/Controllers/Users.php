@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Entities\User;
 
 class Users extends BaseController
 {
@@ -39,18 +40,36 @@ class Users extends BaseController
             'active',
             'avatar',
         ];
-        $users = $this->usersModel->select($atrib)->findAll();
+        $users = $this->usersModel->select($atrib)->orderBy('id', 'DESC')->findAll();
         $data = [];
         
        
 
         foreach ($users as $user) {
 
+            if($user->avatar != null){
+
+                $avatar = [
+                    'src' => site_url("users/avatar/$user->avatar"),
+                    'class' => 'rounded-circle img-fluid',
+                    'alt' => esc($user->name_user),
+                    'width' => '50',
+                ];
+
+            }else{
+                $avatar = [
+                    'src' => site_url("resources/img/user_not_image.png"),
+                    'class' => 'rounded-circle img-fluid',
+                    'alt' => "Usuário sem imagem",
+                    'width' => '50',
+                ];
+            }
+
             $data[] = [
-                "avatar" => $user->avatar,
+                "avatar" => $user->avatar = img($avatar),
                 "name_user" => anchor("users/load/$user->id", esc($user->name_user), 'title="Exibir usuário '.esc($user->name_user).'"'),
                 "email" => esc($user->email),
-                "active" => ($user->active == true ? '<span class="text-success"><i class="fa fa-unlock"></i>&nbsp;Ativo</span>' : '<span class="text-warning"><i class="fa fa-lock"></i>&nbsp;Inativo</span>')
+                "active" => ($user->active == true ? '<span class="text-success"><i class="fa fa-unlock"></i></span>&nbsp;Ativo' : '<span class="text-warning"><i class="fa fa-lock"></i></span>&nbsp;Inativo')
             ];
         }
 
@@ -60,6 +79,45 @@ class Users extends BaseController
 
         return $this->response->setJSON($response);
 
+    }
+
+    public function create(){
+
+        $user = new User();
+        
+        $data = [
+        'title' => "Criando novo usuário ",
+        'user' => $user,
+        ];
+
+        return view('Users/create', $data);
+    }
+
+    public function insert(){
+
+        if(!$this->request->isAJAX()){
+            return redirect()->back();
+        }
+
+        $response['token'] = csrf_hash(); //Envia token para o formulário
+
+        $post = $this->request->getPost(); // Recupera os dados envidados pelo formulário
+
+        $user = new User($post);
+
+        if($this->usersModel->protect(false)->save($user)){
+            $linkCreate = anchor("users/create", 'Cadastrar novo usuário', ['class' => 'btn btn-danger mt-2']);
+
+            session()->setFlashdata('success', "Dados salvos com sucesso!<br> $linkCreate");
+            $response['id'] = $this->usersModel->getInsertID();
+            return $this->response->setJSON($response);
+        }
+
+        $response['erro'] = "Por favor, verifique os erros abaixo e tente novamente.";
+        $response['errors_model'] = $this->usersModel->errors();
+
+        return $this->response->setJSON($response);
+       
     }
 
     public function load(int $id=null){
@@ -95,10 +153,13 @@ class Users extends BaseController
         $response['token'] = csrf_hash(); //Envia token para o formulário
 
         $post = $this->request->getPost(); // Recupera os dados envidados pelo formulário
-        unset($post['password']); // Bypass temporário
-        unset($post['password_confirmation']); // Bypass temporário
 
         $user = $this->getUserOr404($post['id']); // Verificar se o usuário existe
+
+        if(empty($post['password'])){ //Se não foi infomardo a senha, removemos do $post
+            unset($post['password']); 
+            unset($post['password_confirmation']); 
+        }
 
         $user->fill($post); // Carrega o objeto com os dados vindo do Post
 
@@ -108,23 +169,107 @@ class Users extends BaseController
         }
 
         if($this->usersModel->protect(false)->save($user)){
-
+            session()->setFlashdata('success', 'Dados salvos com sucesso!');
             return $this->response->setJSON($response);
         }
 
         $response['erro'] = "Por favor, verifique os erros abaixo e tente novamente.";
-        $response['errors_model'] = $this->usersModel->errors;
+        $response['errors_model'] = $this->usersModel->errors();
 
         return $this->response->setJSON($response);
-        
-         // $response['erro'] = "Essa é uma mensagem de infomação erro";
-        // $response['error_model'] = [
-        //  'nome' => "Nome obrigatório",
-        //  'email' => "Email obrigatório",
-        //  'password' => "A senha é curta",
-        // ];
+      
     }
 
+    public function editImage(int $id=null){
+
+        $user = $this->getUserOr404($id);
+
+        $data = [
+        'title' => "Alterando a imagem do usuário ".esc($user->name_user),
+        'user' => $user,
+        ];
+
+        return view('Users/edit-image', $data);
+    }
+
+    public function upload(){
+
+        if(!$this->request->isAJAX()){
+            return redirect()->back();
+        }
+
+        $response['token'] = csrf_hash(); //Envia token para o formulário
+
+        $validation = service('validation');
+
+        $rules =  [
+            'avatar' => 'uploaded[avatar]|max_size[avatar,1024]|ext_in[avatar,png,jpg,jpeg,webp]',
+            
+        ];
+        $message = [   // Errors
+            'avatar' => [
+                'uploaded' => 'Escolha uma imagem',
+                'max_size' => 'Escolha uma imagem de no máximo 1024',
+                'ext_in' => 'Escolha uma imagem png, jpg, jpeg ou webp',
+            ],
+        ];
+
+        $validation->setRules($rules, $message);
+
+        if($validation->withRequest($this->request)->run() == false){
+            $response['erro'] = "Por favor, verifique os erros abaixo e tente novamente.";
+            $response['errors_model'] = $validation->getErrors();
+    
+            return $this->response->setJSON($response);
+        }
+
+
+        $post = $this->request->getPost(); // Recupera os dados envidados pelo formulário
+
+        $user = $this->getUserOr404($post['id']); // Verificar se o usuário existe
+
+        $avatar = $this->request->getFile('avatar');
+
+        list($width, $heigth) = getimagesize($avatar->getPathName());
+        
+        if($width < "300" || $heigth < "300"){
+            $response['erro'] = "Por favor, verifique os erros abaixo e tente novamente.";
+            $response['errors_model'] = ['size' => "A imagem não pode ser menor que 300 X 300 pixels"];
+    
+            return $this->response->setJSON($response);
+        }
+
+        $path = $avatar->store('users');
+
+        // C:\wamp\www\ordem\writable\uploads/users/1666379579_12a057f4010433a8b4d6.jpg
+        $path = WRITEPATH."uploads/$path";
+
+        //Trata a imagem
+        $this->resourceImage($path);
+        
+        //Recupero a possível imagem
+        $imageOld = $user->avatar;                        
+
+        $user->avatar = $avatar->getName();
+
+        $this->usersModel->save($user);
+
+        //Remove imagem antiga do File System
+        if($imageOld != null){
+            $this->removeImageFileSystem($imageOld);
+        }
+
+        session()->setFlashdata('success', 'Imagem atualizada com sucesso!');
+
+        return $this->response->setJSON($response);
+      
+    }
+
+    public function avatar(string $avatar = null){
+        if($avatar != null){
+            $this->loadFile('users', $avatar);
+        }
+    }
 
 
     private function getUserOr404(int $id=null){
@@ -140,5 +285,21 @@ class Users extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Não encontramos o usuário $id");
         }
         return $user;
+    }
+
+    private function resourceImage(string $path){
+        // Redimensionando a imagem
+        service('image')->withFile($path)
+                        ->fit(300, 300, 'center')
+                        ->save($path);
+    }
+
+    private function removeImageFileSystem(string $imageOld){
+
+        $path = WRITEPATH."uploads/users/$imageOld";
+
+        if(is_file($path)){
+            unlink($path);
+        }
     }
 }

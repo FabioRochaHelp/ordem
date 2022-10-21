@@ -16,9 +16,11 @@
                 <div id="response">
 
                 </div>
-                <?php echo form_open('/', ['id' => 'form'], ['id' => "$user->id"])?>
-                <?php echo $this->include('Users/_form');?>
-
+                <?php echo form_open_multipart('/', ['id' => 'form'], ['id' => "$user->id"])?>
+                <div class="form-group">
+                    <label class="form-control-label">Escolha uma imagem</label>
+                    <input type="file" name="avatar" class="form-control">
+                </div>
                 <div class="form-group mt-5 mb-2">
                     <input id="btn-save" type="submit" value="Salvar" class="btn btn-danger btn-sm mr-s">
                     <a href="<?php echo site_url("users/load/$user->id");?>"
@@ -39,7 +41,7 @@ $(document).ready(function() {
         e.preventDefault();
         $.ajax({
             type: 'POST',
-            url: '<?php echo site_url('users/update')?>',
+            url: '<?php echo site_url('users/upload')?>',
             data: new FormData(this),
             dataType: 'json',
             contentType: false,
@@ -54,38 +56,36 @@ $(document).ready(function() {
                 $("#btn-save").removeAttr('disabled');
                 $('[name=csrf_ordem]').val(response.token);
                 if (!response.erro) {
-                    if (response.info) {
-                        $('#response').html('<div class="alert alert-info">' + response
-                            .info + '</div>');
-                    } else {
-                        //Tudo certo com a atualização do usuário
-                        window.location.href =
-                            "<?php echo site_url("users/load/$user->id");?>";
-                    }
-                }else{
+                    //Tudo certo com a atualização do usuário
+                    window.location.href =
+                        "<?php echo site_url("users/load/$user->id");?>";
+                } else {
                     // Erro de validação
-                    $('#response').html('<div class="alert alert-danger">' + response.erro + '</div>');
+                    $('#response').html('<div class="alert alert-danger">' + response.erro +
+                        '</div>');
 
-                    if(response.errors_model){
-                        $.each(response.errors_model, function(key, valeu){
-                            $('#response').append('<ul class="list-unstyled"><li class="text-danger">'+ valeu +'</li></ul>')
+                    if (response.errors_model) {
+                        $.each(response.errors_model, function(key, valeu) {
+                            $('#response').append(
+                                '<ul class="list-unstyled"><li class="text-danger">' +
+                                valeu + '</li></ul>')
                         });
                     }
 
                 }
-             
+
 
             },
             error: function() {
                 alert(
                     'Não foi possível processar a solicitação. Por favor entre em contato com o suporte técnico.'
-                    )
+                )
                 $("#btn-save").val('Salvar');
                 $("#btn-save").removeAttr('disabled');
             }
         });
     });
-    $("form").submit(function(){
+    $("form").submit(function() {
         $(this).find(":submit").attr('disabled', 'disabled');
     });
 });

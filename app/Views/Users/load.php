@@ -11,18 +11,20 @@
 <div class="row">
     <div class="col-lg-4">
         <div class="block">
+
             <div class="text-center">
                 <?php if($user->avatar == null):?>
                 <img src="<?php echo site_url('resources/img/user_not_image.png')?>" class="card-img-top"
                     style="width: 90%" alt="Usuário Default">
                 <?php else:?>
-                <img src="<?php echo site_url("users/avatar/$user-avatar")?>" class="card-img-top" style="width: 90%"
+                <img src="<?php echo site_url("users/avatar/$user->avatar")?>" class="card-img-top" style="width: 90%"
                     alt="<?php echo esc($user->avatar);?>">
                 <?php endif;?>
 
-                <a href="<?php echo site_url("user/editimage/$user->id")?>"
+                <a href="<?php echo site_url("users/editimage/$user->id")?>"
                     class="btn btn-outline-primary btn-sm mt-3">Alterar imagem</a>
             </div>
+
             <hr class="border-secondary">
             <h5 class="card-title mt-2"><?php echo esc($user->name_user);?></h5>
             <p class="card-text"><?php echo esc($user->email);?></p>
@@ -42,6 +44,7 @@
                     <a class="dropdown-item" href="#">Separated link</a>
                 </div>
             </div>
+
             <a href="<?php echo site_url("users");?>" class="btn btn-secondary ml-2">Voltar</a>
 
         </div>

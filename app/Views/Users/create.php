@@ -21,7 +21,7 @@
 
                 <div class="form-group mt-5 mb-2">
                     <input id="btn-save" type="submit" value="Salvar" class="btn btn-danger btn-sm mr-s">
-                    <a href="<?php echo site_url("users/load/$user->id");?>"
+                    <a href="<?php echo site_url("users");?>"
                         class="btn btn-secondary btn-sm ml-2">Voltar</a>
                 </div>
                 <?php echo form_close();?>
@@ -39,7 +39,7 @@ $(document).ready(function() {
         e.preventDefault();
         $.ajax({
             type: 'POST',
-            url: '<?php echo site_url('users/update')?>',
+            url: '<?php echo site_url('users/insert')?>',
             data: new FormData(this),
             dataType: 'json',
             contentType: false,
@@ -60,7 +60,7 @@ $(document).ready(function() {
                     } else {
                         //Tudo certo com a atualização do usuário
                         window.location.href =
-                            "<?php echo site_url("users/load/$user->id");?>";
+                            "<?php echo site_url("users/load/");?>" + response.id;
                     }
                 }else{
                     // Erro de validação
