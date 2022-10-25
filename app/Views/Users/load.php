@@ -28,7 +28,7 @@
             <hr class="border-secondary">
             <h5 class="card-title mt-2"><?php echo esc($user->name_user);?></h5>
             <p class="card-text"><?php echo esc($user->email);?></p>
-            <p class="card-text">Usuário: <?php echo ($user->active == true ? 'Ativo' : 'Inativo');?></p>
+            <p class="card-text">Usuário: <?php echo $user->getSituation();?></p>
             <p class="card-text">Criado <?php echo $user->created_at->humanize();?></p>
             <p class="card-text">Atualizado <?php echo $user->updated_at->humanize();?></p>
 
@@ -41,7 +41,12 @@
                 <div class="dropdown-menu">
                     <a class="dropdown-item" href="<?php echo site_url("users/edit/$user->id");?>">Editar usuário</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Separated link</a>
+
+                    <?php if($user->deleted_at == null):?>
+                    <a class="dropdown-item" href="<?php echo site_url("users/delete/$user->id");?>">Excluir usuário</a>
+                    <?php else: ?>
+                    <a class="dropdown-item" href="<?php echo site_url("users/restore/$user->id");?>">Restaurar usuário</a>
+                    <?php endif; ?>
                 </div>
             </div>
 

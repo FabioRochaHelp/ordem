@@ -16,12 +16,12 @@
                 <div id="response">
 
                 </div>
-                <?php echo form_open('/', ['id' => 'form'], ['id' => "$user->id"])?>
-                <?php echo $this->include('Users/_form');?>
+                <?php echo form_open('/', ['id' => 'form'], ['id' => "$group->id"])?>
+                <?php echo $this->include('Groups/_form');?>
 
                 <div class="form-group mt-5 mb-2">
                     <input id="btn-save" type="submit" value="Salvar" class="btn btn-danger btn-sm mr-s">
-                    <a href="<?php echo site_url("users/load/$user->id");?>"
+                    <a href="<?php echo site_url("groups/load/$group->id");?>"
                         class="btn btn-secondary btn-sm ml-2">Voltar</a>
                 </div>
                 <?php echo form_close();?>
@@ -39,7 +39,7 @@ $(document).ready(function() {
         e.preventDefault();
         $.ajax({
             type: 'POST',
-            url: '<?php echo site_url('users/update')?>',
+            url: '<?php echo site_url('groups/update')?>',
             data: new FormData(this),
             dataType: 'json',
             contentType: false,
@@ -60,16 +60,15 @@ $(document).ready(function() {
                     } else {
                         //Tudo certo com a atualização do usuário
                         window.location.href =
-                            "<?php echo site_url("users/load/$user->id");?>";
+                            "<?php echo site_url("groups/load/$group->id");?>";
                     }
                 }else{
                     // Erro de validação
                     $('#response').html('<div class="alert alert-danger">' + response.erro + '</div>');
-                    console.log(response);
 
                     if(response.errors_model){
-                        $.each(response.errors_model, function(key, value){
-                            $('#response').append('<ul class="list-unstyled"><li class="text-danger">'+ value +'</li></ul>')
+                        $.each(response.errors_model, function(key, valeu){
+                            $('#response').append('<ul class="list-unstyled"><li class="text-danger">'+ valeu +'</li></ul>')
                         });
                     }
 

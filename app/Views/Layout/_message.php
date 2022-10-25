@@ -12,7 +12,7 @@
 <?php if(session()->has('info')): ?>
 
 <div class="alert alert-info alert-dismissible fade show" role="alert">
-    <strong>Info!</strong> <?php echo session('info');?>
+    <strong>Informação!</strong> <?php echo session('info');?>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -23,7 +23,7 @@
 <?php if(session()->has('alert')): ?>
 
 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <strong>Aenção!</strong> <?php echo session('alert');?>
+    <strong>Atenção!</strong> <?php echo session('alert');?>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>

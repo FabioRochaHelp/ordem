@@ -7,6 +7,7 @@ use CodeIgniter\Model;
 class UsersModel extends Model
 {
     protected $table            = 'users';
+    
     protected $returnType       = 'App\Entities\User';
     protected $useSoftDeletes   = true;
     protected $allowedFields    = [

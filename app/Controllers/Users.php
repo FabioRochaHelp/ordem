@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Entities\User;
+use App\Models\UsersModel;
 
 class Users extends BaseController
 {
@@ -39,8 +40,12 @@ class Users extends BaseController
             'email',
             'active',
             'avatar',
+            'deleted_at'
         ];
-        $users = $this->usersModel->select($atrib)->orderBy('id', 'DESC')->findAll();
+        $users = $this->usersModel->select($atrib)
+                                ->withDeleted(true)
+                                ->orderBy('id', 'DESC')
+                                ->findAll();
         $data = [];
         
        
@@ -69,7 +74,7 @@ class Users extends BaseController
                 "avatar" => $user->avatar = img($avatar),
                 "name_user" => anchor("users/load/$user->id", esc($user->name_user), 'title="Exibir usuário '.esc($user->name_user).'"'),
                 "email" => esc($user->email),
-                "active" => ($user->active == true ? '<span class="text-success"><i class="fa fa-unlock"></i></span>&nbsp;Ativo' : '<span class="text-warning"><i class="fa fa-lock"></i></span>&nbsp;Inativo')
+                "active" => $user->getSituation()   ,
             ];
         }
 
@@ -269,6 +274,54 @@ class Users extends BaseController
         if($avatar != null){
             $this->loadFile('users', $avatar);
         }
+    }
+
+    public function delete(int $id=null){
+
+        $user = $this->getUserOr404($id);
+
+        if($user->deleted_at != null){
+            return redirect()->back()->with('info', "Esse usuário já encontra-se excluído.");
+        }
+        
+        if($this->request->getMethod() === 'post'){
+
+            $this->usersModel->delete($user->id);
+
+            if($user->avatar!=null){
+                $this->removeImageFileSystem($user->avatar);
+            }
+
+            $user->avatar = null;
+            $user->active = false;
+
+            $this->usersModel->protect(false)->save($user);
+
+            return redirect()->to(site_url("users"))->with('success', "Usuário $user->name_user excluído com sucesso!");
+        }
+
+        $data = [
+        'title' => "Excluindo o usuário ".esc($user->name_user),
+        'user' => $user,
+        ];
+
+        return view('Users/delete', $data);
+    }
+
+    public function restoreDelete(int $id=null){
+
+        $user = $this->getUserOr404($id);
+
+        if($user->deleted_at == null){
+            return redirect()->back()->with('info', "Apenas usuários excluídos podem ser recuperados.");
+        }
+        
+        $user->deleted_at = null;
+        $this->usersModel->protect(false)->save($user);
+
+        return redirect()->back()->with('success', "Usuário $user->name_user recuperado com sucesso.");
+
+        
     }
 
 
