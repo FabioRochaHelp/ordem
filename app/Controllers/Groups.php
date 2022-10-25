@@ -9,10 +9,12 @@ class Groups extends BaseController
 {
 
     protected $groupsModel;
-
+    protected $groupsPermissionsModel;
+    
     public function __construct()
     {
         $this->groupsModel = new \App\Models\GroupsModel();
+        $this->groupsPermissionsModel = new \App\Models\GroupsPermissionsModel();
     }
 
     public function index()
@@ -91,7 +93,7 @@ class Groups extends BaseController
         $group = new Group($post);
 
         if($this->groupsModel->save($group)){
-            $linkCreate = anchor("group/create", 'Cadastrar novo grupo de acesso', ['class' => 'btn btn-danger mt-2']);
+            $linkCreate = anchor("groups/create", 'Cadastrar novo grupo de acesso', ['class' => 'btn btn-danger mt-2']);
 
             session()->setFlashdata('success', "Dados salvos com sucesso!<br> $linkCreate");
             $response['id'] = $this->groupsModel->getInsertID();
@@ -219,6 +221,29 @@ class Groups extends BaseController
 
         return redirect()->back()->with('success', 'Grupo ' . esc($group->groupname) . ' recuperado com sucesso.');
         
+    }
+
+    public function permissions(int $id=null){
+
+        $group = $this->getGroupOr404($id);
+
+        if($group->id < 3){
+            return redirect()
+                    ->back()
+                    ->with('info', 'Para grupo <b>' . esc($group->groupname).' </b>não é necessário atribuir permissões.');
+        }
+
+        if($group->id >2){
+            $group->permissions = $this->groupsPermissionsModel->getPermissionsGroups($group->id, 5);
+            $group->pager = $this->groupsPermissionsModel->pager;
+        }
+
+        $data = [
+        'title' => "Gerenciando as permissões do grupo de acesso ".esc($group->groupname),
+        'group' => $group,
+        ];
+
+        return view('Groups/permissions', $data);
     }
 
     private function getGroupOr404(int $id=null){
