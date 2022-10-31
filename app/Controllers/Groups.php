@@ -6,15 +6,17 @@ use App\Controllers\BaseController;
 use App\Entities\Group;
 
 class Groups extends BaseController
-{
+{ 
 
     protected $groupsModel;
     protected $groupsPermissionsModel;
+    protected $permissionsModel;
     
     public function __construct()
     {
         $this->groupsModel = new \App\Models\GroupsModel();
         $this->groupsPermissionsModel = new \App\Models\GroupsPermissionsModel();
+        $this->permissionsModel = new \App\Models\PermissionsModel();
     }
 
     public function index()
@@ -243,8 +245,62 @@ class Groups extends BaseController
         'group' => $group,
         ];
 
+        if(!empty($group->permissions)){
+            $permissionsExists = array_column($group->permissions, 'permissions_id');
+            $data['permissionsAvailable'] = $this->permissionsModel->whereNotIn('id', $permissionsExists)->findAll();
+        }else{
+            $data['permissionsAvailable'] = $this->permissionsModel->findAll();
+        }
+
         return view('Groups/permissions', $data);
     }
+
+    public function savePermissions(){
+        if(!$this->request->isAJAX()){
+            return redirect()->back();
+        }
+
+        $response['token'] = csrf_hash(); //Envia token para o formulário
+
+        $post = $this->request->getPost(); // Recupera os dados envidados pelo formulário
+
+        $group = $this->getGroupOr404($post['id']); // Verificar se o usuário existe
+
+        if(empty($post['permissions_id'])){
+            $response['erro'] = "Por favor, verifique os erros abaixo e tente novamente.";
+            $response['errors_model'] = ['permissions_id' => 'Escolha uma ou mais permissões para salvar'];
+    
+            return $this->response->setJSON($response);
+        }
+
+        $permissionPush = [];
+
+        foreach($post['permissions_id'] as $permission){
+            array_push($permissionPush,[
+                'groups_id' => $group->id,
+                'permissions_id' => $permission,
+            ]);
+        }
+
+        $this->groupsPermissionsModel->insertBatch($permissionPush);
+        session()->setFlashdata('success', 'Dados salvos com sucesso!');
+        return $this->response->setJSON($response);
+    }
+
+    public function removePermissions(int $main_id=null){
+
+        
+        if($this->request->getMethod() === 'post'){
+
+            $this->groupsPermissionsModel->delete($main_id);
+
+            return redirect()->back()->with('success', 'Permissão removida com sucesso!');
+        }
+
+        return redirect()->back();
+
+    }
+    
 
     private function getGroupOr404(int $id=null){
 

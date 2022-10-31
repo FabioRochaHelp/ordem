@@ -21,7 +21,7 @@ class GroupsPermissionsModel extends Model
     public function getPermissionsGroups(int $groups_id, $count_page)
     {
         $atrib = [
-            'groups_permissions.id',
+            'groups_permissions.id AS main_id',
             'groups.id AS groups_id',
             'permissions.id AS permissions_id',
             'permissions.permission',

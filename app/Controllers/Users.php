@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Entities\User;
 use App\Models\UsersModel;
+use App\Models\GroupsUsersModel;
 
 class Users extends BaseController
 {
@@ -14,6 +15,8 @@ class Users extends BaseController
     {
 
         $this->usersModel = new \App\Models\UsersModel();
+        $this->groupsUsersModel = new \App\Models\GroupsUsersModel();
+        $this->groupsModel = new \App\Models\GroupsModel();
         
     }
 
@@ -322,6 +325,76 @@ class Users extends BaseController
         return redirect()->back()->with('success', "Usuário $user->name_user recuperado com sucesso.");
 
         
+    }
+
+    public function groups(int $id=null){
+
+        $user = $this->getUserOr404($id);
+
+        $user->groups = $this->groupsUsersModel->getGroupsUsers($user->id, 5);
+        $user->pager = $this->groupsUsersModel->pager;
+
+        $data = [
+        'title' => "Gerenciando os grupos de acesso do usuário ".esc($user->name_user),
+        'user' => $user,
+        ];
+
+
+        // Quando o usuário for um cliente, podemos retornar a View de 
+        //exibição do usuário infromando que ele é um cliente que não é possível adicioná-lo a outros grupos.
+        if(in_array(2, array_column($user->groups,'group_id'))) {
+            return redirect()->to(site_url("users/load/$user->id"))->with('info', 'Esse usuário é um cliente, não é necessário atribuí-lo a um grupo de acesso');
+        }
+        
+        if(!empty($user->groups)){
+            $groupsExists = array_column($user->groups, 'group_id');
+            $data['groupsAvailable'] = $this->groupsModel->where('id != ', 2)->whereNotIn('id', $groupsExists)->findAll();
+        }else{
+            $data['groupsAvailable'] = $this->groupsModel->where('id != ', 2)->findAll();
+        }
+
+        return view('Users/groups', $data);
+    }
+
+    public function saveGroups(){
+        if(!$this->request->isAJAX()){
+            return redirect()->back();
+        }
+
+        $response['token'] = csrf_hash(); //Envia token para o formulário
+
+        $post = $this->request->getPost(); // Recupera os dados envidados pelo formulário
+
+        $user = $this->getUserOr404($post['id']); // Verificar se o usuário existe
+
+        if(empty($post['groups_id'])){
+            $response['erro'] = "Por favor, verifique os erros abaixo e tente novamente.";
+            $response['errors_model'] = ['group_id' => 'Escolha um ou mais grupos para salvar'];
+    
+            return $this->response->setJSON($response);
+        }
+
+
+        if(in_array(2, $post['groups_id'])){
+            $response['erro'] = "Por favor, verifique os erros abaixo e tente novamente.";
+            $response['errors_model'] = ['group_id' => 'O grupo de Clientes não pode ser atribuído de forma manual.'];
+    
+            return $this->response->setJSON($response);
+        }
+
+        $groupsPush = [];
+
+        foreach($post['groups_id'] as $group){
+            array_push($groupsPush,[
+                'groups_id' => $group,
+                'users_id' => $user->id,
+            ]);
+        }
+
+
+        $this->groupsUsersModel->insertBatch($groupsPush);
+        session()->setFlashdata('success', 'Dados salvos com sucesso!');
+        return $this->response->setJSON($response);
     }
 
 

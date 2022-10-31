@@ -32,27 +32,27 @@
 <?php echo $this->section('content'); ?>
 
 <div class="row">
-    <div class="col-lg-8">
+    <div class="col-lg-4">
         <div class="block">
-            <?php if(empty($permissionsAvailable)): ?>
-            <p class="text-center mt-0">Esse grupo já possui todas as permissões de acesso!</p>
+            <?php if(empty($groupsAvailable)): ?>
+            <p class="text-center mt-0">Esse usuário já faz parte de todos os grupos disponíveis!</p>
             <?php else: ?>
             <div id="response">
 
             </div>
-            <?php echo form_open('/', ['id' => 'form'], ['id' => "$group->id"])?>
+            <?php echo form_open('/', ['id' => 'form'], ['id' => "$user->id"])?>
             <div class="form-group">
                 <label class="form-control-label">Escolha uma ou mais pemissões</label>
-                <select name="permissions_id[]" multiple class="selectize">
+                <select name="groups_id[]" multiple class="selectize">
                     <option value="">Escolha...</option>
-                    <?php foreach ($permissionsAvailable as $permission): ?>
-                    <option value="<?php echo $permission->id;?>"><?php echo $permission->permission;?></option>
+                    <?php foreach ($groupsAvailable as $group): ?>
+                    <option value="<?php echo $group->id;?>"><?php echo $group->groupname;?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="form-group mt-5 mb-2">
                 <input id="btn-save" type="submit" value="Salvar" class="btn btn-danger btn-sm mr-s">
-                <a href="<?php echo site_url("groups/load/$group->id");?>"
+                <a href="<?php echo site_url("users/load/$user->id");?>"
                     class="btn btn-secondary btn-sm ml-2">Voltar</a>
             </div>
             <?php echo form_close();?>
@@ -63,32 +63,33 @@
 
         </div>
     </div>
-    <div class="col-lg-4">
+    <div class="col-lg-8">
         <div class="block">
 
-            <?php  if(empty($group->permissions)):?>
-            <p class="text-center text-warning mt-0">Esse grupo ainda não possui permissões de acesso!</p>
+            <?php  if(empty($user->groups)):?>
+            <p class="text-center text-warning mt-0">Esse usuário não faz parte de nenhum grupo de acesso!</p>
             <?php else :?>
             <div class="table-responsive">
                 <table class="table table-bordered table-striped table-sm">
                     <thead>
                         <tr>
-                            <th>Permissão</th>
+                            <th>Grupo de acesso</th>
+                            <th>Descrição</th>
                             <th>Ação</th>
                         </tr>
                     </thead> 
                     <tbody>
-                        <?php foreach ($group->permissions as $permission): ?>
+                        <?php foreach ($user->groups as $group): ?>
                         <tr>
-                            <td><?php echo $permission->permission;?></td>
-
+                            <td><?php echo $group->groupname;?></td>
+                            <td><?php echo ellipsize($group->description, 32, .5) ;?></td>
                             <td>
                                 <?php 
                                     $atrib = [
                                         'onSubmit' => "return confirm('Tem certeza da exclusão da pemissão?');",
                                     ];
                                 ?>
-                                <?php echo form_open("groups/removepermissions/$permission->main_id", $atrib); ?>
+                                <?php echo form_open("users/removegroups/$group->main_id", $atrib); ?>
                                       <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
                                 <?php echo form_close();?>
                             </td>
@@ -97,7 +98,7 @@
                     </tbody>
                 </table>
                 <div class="mt-3 ml-1">
-                    <?php echo $group->pager->links();?>
+                    <?php echo $user->pager->links();?>
                 </div>
             </div>
             <?php endif;?>
@@ -122,7 +123,7 @@ $(document).ready(function() {
         e.preventDefault();
         $.ajax({
             type: 'POST',
-            url: '<?php echo site_url('groups/savepermissions')?>',
+            url: '<?php echo site_url('users/savegroups')?>',
             data: new FormData(this),
             dataType: 'json',
             contentType: false,
@@ -139,7 +140,7 @@ $(document).ready(function() {
                 if (!response.erro) {
                     //Tudo certo com a atualização do usuário
                     window.location.href =
-                        "<?php echo site_url("groups/permissions/$group->id");?>";
+                        "<?php echo site_url("users/groups/$user->id");?>";
                 } else {
                     // Erro de validação
                     $('#response').html('<div class="alert alert-danger">' + response.erro +
