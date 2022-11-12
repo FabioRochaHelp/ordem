@@ -67,4 +67,29 @@ class UsersModel extends Model
         return $data;
     }
 
+    public function getUserEmail(string $email){
+
+        return $this->where('email', $email)->where('deleted_at', null)->first();
+    }
+
+    public function getPermissionUserLogin(int $user_id){
+        $attrib = [
+            'users.id',
+            'users.name_user AS user', 
+            'groups_users.*',
+            'permissions.permission',
+        ];
+
+        return $this->select($attrib)
+                    ->asArray()
+                    ->join('groups_users', 'groups_users.users_id = users.id')
+                    ->join('groups_permissions', 'groups_permissions.groups_id = groups_users.groups_id')
+                    ->join('permissions', 'permissions.id = groups_permissions.permissions_id')
+                    ->where('users.id', $user_id)
+                    ->groupBy('permissions.permission')
+                    ->findAll();
+    }
+
+
+
 }

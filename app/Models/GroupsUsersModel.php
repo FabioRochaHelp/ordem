@@ -36,5 +36,10 @@ class GroupsUsersModel extends Model
                     ->paginate($count_page);
     }
     
+    public function userInGroup(int $group_id, int $user_id){
+        return $this->where('groups_id', $group_id)
+                    ->where('users_id', $user_id)
+                    ->first();
+    }
 
 }

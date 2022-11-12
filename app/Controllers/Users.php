@@ -382,6 +382,24 @@ class Users extends BaseController
             return $this->response->setJSON($response);
         }
 
+        if(in_array(1, $post['groups_id'])){
+            $groupAdmin =[
+                'groups_id' => 1,
+                'users_id' => $user->id,
+            ];
+
+            $this->groupsUsersModel->insert($groupAdmin);
+            $this->groupsUsersModel->where('groups_id !=', 1)
+                                   ->where('users_id', $user->id)
+                                   ->delete(); 
+
+            session()->setFlashdata('success', 'Dados salvos com sucesso!');
+            session()->setFlashdata('info', 'Notamos que o grupo Administrador foi selecionado, sendo assim, não é necessário selecionar outro grupo.');
+
+            return $this->response->setJSON($response);
+        }
+
+
         $groupsPush = [];
 
         foreach($post['groups_id'] as $group){
@@ -395,6 +413,21 @@ class Users extends BaseController
         $this->groupsUsersModel->insertBatch($groupsPush);
         session()->setFlashdata('success', 'Dados salvos com sucesso!');
         return $this->response->setJSON($response);
+    }
+
+    public function removeGroups(int $main_id = null){
+        if($this->request->getMethod()=== 'post'){
+            $groupUser = $this->getGroupUser($main_id);
+
+            if($groupUser->groups_id == 2){
+                return redirect()->to(site_url("users/load/$groupUser->users_id"))->with("info", "Não é permitida da exclusão do usuário do grupo de Clientes");
+            }
+        }
+
+        $this->groupsUsersModel->delete($main_id);
+
+        return redirect()->back()->with("success", "Usuário removido do grupo de acesso com sucesso!");
+        
     }
 
 
@@ -411,6 +444,20 @@ class Users extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Não encontramos o usuário $id");
         }
         return $user;
+    }
+    private function getGroupUser(int $main_id=null){
+
+    /**
+     * Método que recupera o registro do grupo associado ao usuário
+     * 
+     * @param integer $main_id
+     * @return Exception|object
+     */
+
+        if(!$main_id || !$groupUser = $this->groupsUsersModel->withDeleted(true)->find($main_id)){
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Não encontramos o registro de associação ao grupo de acesso $main_id");
+        }
+        return $groupUser;
     }
 
     private function resourceImage(string $path){

@@ -86,7 +86,7 @@
                             <td>
                                 <?php 
                                     $atrib = [
-                                        'onSubmit' => "return confirm('Tem certeza da exclusão da pemissão?');",
+                                        'onSubmit' => "return confirm('Tem certeza da exclusão do grupo de acesso?');",
                                     ];
                                 ?>
                                 <?php echo form_open("users/removegroups/$group->main_id", $atrib); ?>
