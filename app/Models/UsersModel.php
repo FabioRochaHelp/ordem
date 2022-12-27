@@ -74,9 +74,9 @@ class UsersModel extends Model
 
     public function getPermissionUserLogin(int $user_id){
         $attrib = [
-            'users.id',
-            'users.name_user AS user', 
-            'groups_users.*',
+            // 'users.id',
+            // 'users.name_user AS user', 
+            // 'groups_users.*',
             'permissions.permission',
         ];
 

@@ -228,7 +228,7 @@
                                     class="mr-2"><span>French </span></a></div>
                     </div>
                     <!-- Log out               -->
-                    <div class="list-inline-item logout"> <a id="logout" href="login.html" class="nav-link">Logout <i
+                    <div class="list-inline-item logout"> <a id="logout" href="<?php echo site_url('login/logout')?>" class="nav-link">Logout <i
                                 class="icon-logout"></i></a></div>
                 </div>
             </div>

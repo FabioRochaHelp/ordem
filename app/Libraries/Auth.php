@@ -41,11 +41,7 @@ class Auth{
 
     }
 
-    public function logout(): void
-    {
-        session()->destroy();
-
-    }
+    
 
     //Pega usuário logado
     public function getUserLogin(){

@@ -44,4 +44,29 @@ class User extends Entity
         return password_verify($password, $this->password_hash);
 
     }
+
+    /**
+     * Método que verifica se o usuário logado tem permissão para determinada rota.
+     * 
+     * 
+     * @param string $password
+     * @return boolean
+     */
+
+    public function permissionFor(string $prermission):bool{
+        if($this->is_admin == true){
+            return true;
+        }
+
+        if(empty($this->permissions)){
+            return false;
+        }
+
+        if(in_array($prermission, $this->permissions) ==  false){
+            return false;
+        }
+
+        return true;
+
+    }
 }
