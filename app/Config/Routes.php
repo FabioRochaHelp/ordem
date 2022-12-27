@@ -38,7 +38,9 @@ $routes->setAutoRoute(true);
 
 $routes->get('/', 'Home::index');
 
-$routes->get('login', 'Login::index');
+// $routes->get('login', 'Login::index');
+$routes->get('logout', 'Login::logout');
+$routes->get('forgot', 'Password::forgot');
 /*
  * --------------------------------------------------------------------
  * Additional Routing

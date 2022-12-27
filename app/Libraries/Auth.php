@@ -41,6 +41,12 @@ class Auth{
 
     }
 
+    public function logout()
+    {
+        session()->destroy();
+    }
+
+
     
 
     //Pega usuário logado
@@ -140,4 +146,5 @@ class Auth{
 
     }
 
+   
 }

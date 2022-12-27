@@ -50,8 +50,18 @@ class Login extends BaseController
 
     public function logout()
     {
-        session()->destroy();
-        return redirect()->to(site_url("login"));
+        $auth = service('auth');
 
+        $userLogin = $auth->getUserLogin();
+
+        $auth->logout();
+
+        return redirect()->to(site_url("login/messagelogout/$userLogin->name_user"));
+
+    }
+
+    public function messageLogout(String $user = null)
+    {
+        return redirect()->to(site_url("login"))->with("success", "$user, esperamos ver você novamente!" );
     }
 }

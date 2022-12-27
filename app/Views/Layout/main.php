@@ -220,7 +220,7 @@
                     <div class="list-inline-item dropdown"><a id="languages" rel="nofollow" data-target="#" href="#"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                             class="nav-link language dropdown-toggle"><img src="img/flags/16/GB.png" alt="English"><span
-                                class="d-none d-sm-inline-block">English</span></a>
+                                class="d-none d-sm-inline-block"><?php echo user_logged()->user_name;?></span></a>
                         <div aria-labelledby="languages" class="dropdown-menu"><a rel="nofollow" href="#"
                                 class="dropdown-item"> <img src="img/flags/16/DE.png" alt="English"
                                     class="mr-2"><span>German</span></a><a rel="nofollow" href="#"
@@ -228,7 +228,7 @@
                                     class="mr-2"><span>French </span></a></div>
                     </div>
                     <!-- Log out               -->
-                    <div class="list-inline-item logout"> <a id="logout" href="<?php echo site_url('login/logout')?>" class="nav-link">Logout <i
+                    <div class="list-inline-item logout"> <a id="logout" href="<?php echo site_url('logout')?>" class="nav-link">Sair <i
                                 class="icon-logout"></i></a></div>
                 </div>
             </div>
@@ -241,7 +241,7 @@
             <div class="sidebar-header d-flex align-items-center">
                 <div class="avatar"><img src="img/avatar-6.jpg" alt="..." class="img-fluid rounded-circle"></div>
                 <div class="title">
-                    <h1 class="h5">Mark Stephen</h1>
+                    <h1 class="h5"><?php echo user_logged()->name_user;?></h1>
                     <p>Web Designer</p>
                 </div>
             </div>
@@ -263,7 +263,7 @@
                         <li><a href="#">Page</a></li>
                     </ul>
                 </li>
-                <li><a href="login.html"> <i class="icon-logout"></i>Login page </a></li>
+                <li><a href="<?php echo site_url("users/editpassword");?>"> <i class="icon-settings"></i>Alterar Senha </a></li>
             </ul><span class="heading">Extras</span>
             <ul class="list-unstyled">
                 <li> <a href="#"> <i class="icon-settings"></i>Demo </a></li>

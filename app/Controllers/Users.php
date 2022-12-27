@@ -430,6 +430,50 @@ class Users extends BaseController
         
     }
 
+    public function editPassword() {
+        $data = [
+            'title' => 'Edite a sua senha de acesso.',
+        ];
+
+        return view('users/edit-password', $data);
+    }
+
+    public function updatePassword() {
+        if(!$this->request->isAJAX()){
+            return redirect()->back();
+        }
+
+        $response['token'] = csrf_hash(); //Envia token para o formulário
+
+        $current_password = $this->request->getPost('current_password');
+
+        $user = user_logged();
+
+        if($user->verifyPassword($current_password) === false){
+            $response['erro'] = "Por favor, verifique os erros abaixo e tente novamente.";
+            $response['errors_model'] = ['current_password' => 'Senha atual inválida'];
+            return $this->response->setJSON($response); 
+        }
+
+        $user->fill($this->request->getPost());
+
+        if($user->hasChanged() == false){
+            $response['info'] = "Não há dados para serem atualizados";
+            return $this->response->setJSON($response);
+        }
+
+        if($this->usersModel->save($user)){
+            $response['success'] = 'Senha alterada com sucesso.';
+            return $this->response->setJSON($response);
+        }
+
+        $response['erro'] = "Por favor, verifique os erros abaixo e tente novamente.";
+        $response['errors_model'] = $this->usersModel->errors();
+
+        return $this->response->setJSON($response);
+
+    }
+
 
     private function getUserOr404(int $id=null){
 
