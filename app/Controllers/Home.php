@@ -33,4 +33,20 @@ class Home extends BaseController
         return redirect()->to(site_url('/'));
 
     }
+
+    public function email(){
+        $email = service('email');
+
+        $email->setFrom('no-reply@ordem.com', 'Ordem de Serviço');
+        $email->setTo('zfgpgzrh@triots.com');
+
+        $email->setSubject('Recuperação de senha');
+        $email->setMessage('Iniciando a recuperação de senha.');
+
+        if($email->send()){
+            echo 'email enviado';
+        }else{
+            $email->printDebugger();
+        }
+    }
 }

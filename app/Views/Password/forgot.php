@@ -15,7 +15,7 @@
             <div class="logo">
               <h1><?php echo $title;?></h1>
             </div>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+            <p>Informe seu e-mail de acesso para iniciarmos a recuperação da senha.</p>
           </div>
         </div>
       </div>
@@ -28,15 +28,12 @@
              
               <div class="form-group">
                 <input id="login-username" type="text" name="email" required data-msg="Pr favor, informe seu e-mail." class="input-material">
-                <label for="login-username" class="label-material">Seu e-mail de acesso</label>
+                <label for="login-username" class="label-material">Informe seu e-mail de acesso</label>
               </div>
-              <div class="form-group">
-                <input id="login-password" type="password" name="password" required data-msg="Por favor, informe a sua senha." class="input-material">
-                <label for="login-password" class="label-material">Sua senha</label>
-              </div>
-              <input type="submit" id="btn-login" class="btn btn-primary" value="Entrar"/>
+              
+              <input type="submit" id="btn-forgot" class="btn btn-primary" value="Começar"/>
               <!-- This should be submit button but I replaced it with <a> for demo purposes-->
-            </form><a href="<?php echo site_url('forgot');?>" class="forgot-pass mt-3">Esqueceu a sua senha?</a>
+            </form><a href="<?php echo site_url('login');?>" class="forgot-pass mt-3">Lembrou a sua senha de acesso?</a>
             <?php echo form_close(); ?>
           </div>
         </div>
@@ -53,7 +50,7 @@ $(document).ready(function() {
         e.preventDefault();
         $.ajax({
             type: 'POST',
-            url: '<?php echo site_url('login/create')?>',
+            url: '<?php echo site_url('password/processforgot')?>',
             data: new FormData(this),
             dataType: 'json',
             contentType: false,
@@ -61,15 +58,15 @@ $(document).ready(function() {
             processData: false,
             beforeSend: function() {
                 $("#response").html('');
-                $("#btn-login").val('Por favor, aguarde...');
+                $("#btn-forgot").val('Por favor, aguarde...');
             },
             success: function(response) {
-                $("#btn-login").val('Salvar');
-                $("#btn-login").removeAttr('disabled');
+                $("#btn-forgot").val('Salvar');
+                $("#btn-forgot").removeAttr('disabled');
                 $('[name=csrf_ordem]').val(response.token);
                 if (!response.erro) {
                     window.location.href =
-                            "<?php echo site_url();?>" + response.redirect;
+                            "<?php echo site_url("password/resetsend");?>";
                 }else{
                     // Erro de validação
                     $('#response').html('<div class="alert alert-danger">' + response.erro + '</div>');
@@ -88,8 +85,8 @@ $(document).ready(function() {
                 alert(
                     'Não foi possível processar a solicitação. Por favor entre em contato com o suporte técnico.'
                     )
-                $("#btn-login").val('Salvar');
-                $("#btn-login").removeAttr('disabled');
+                $("#btn-forgot").val('Salvar');
+                $("#btn-forgot").removeAttr('disabled');
             }
         });
     });

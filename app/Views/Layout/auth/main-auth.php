@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <?php echo $this->renderSection('style');?>
+    <title> FR - Ordem de Serviço | <?php echo $this->renderSection('title');?> </title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="all,follow">
@@ -32,11 +32,11 @@
     <div class="login-page">
       <div class="container d-flex align-items-center">
         <div class="form-holder has-shadow">
-
+           <?php echo $this->include('Layout/_message') ?>
           <!-- Espaço para ser reinderizado -->
           <?php echo $this->renderSection('content');?>
 
-        
+         
 
         </div>
       </div>
